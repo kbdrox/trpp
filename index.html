@@ -16,6 +16,36 @@
             align-items: center;
             justify-content: center;
         }
+        .ad-container {
+            width: 100%;
+            max-width: 970px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .ad-container iframe {
+            border: none;
+            max-width: 100%;
+        }
+        /* Desktop ad (970x90) */
+        .ad-container iframe.desktop-ad {
+            width: 970px;
+            height: 90px;
+        }
+        /* Mobile ad (300x50) */
+        .ad-container iframe.mobile-ad {
+            width: 300px;
+            height: 50px;
+            display: none;
+        }
+        /* Show mobile ad on smaller screens */
+        @media (max-width: 768px) {
+            .ad-container iframe.desktop-ad {
+                display: none;
+            }
+            .ad-container iframe.mobile-ad {
+                display: inline-block;
+            }
+        }
         .container {
             background: #fff;
             border-radius: 12px;
@@ -66,6 +96,10 @@
     </style>
 </head>
 <body>
+    <div class="ad-container">
+        <iframe src="ads/pk test_970x90/index.html" class="desktop-ad" scrolling="no"></iframe>
+        <iframe src="ads/pk test_300x50/index.html" class="mobile-ad" scrolling="no"></iframe>
+    </div>
     <div class="container">
         <h1>The Retired PoPo</h1>
         <div class="subtitle">
