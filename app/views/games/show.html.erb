@@ -1,0 +1,72 @@
+<div class="min-h-screen bg-gray-100 py-6 flex flex-col justify-center items-center">
+  <div class="bg-white shadow-lg rounded-3xl p-8 flex flex-col items-center relative">
+    <h1 class="text-4xl font-bold text-center mb-8">Bodycam Bingo</h1>
+    <div id="bingo-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+      <span class="hidden px-8 py-4 rounded-xl text-[4.8rem] sm:text-[6.4rem] font-extrabold text-red-600 bg-transparent rotate-[-20deg]" style="opacity: 1; line-height: 1;">BINGO!!!</span>
+    </div>
+    <div class="w-[90vw] max-w-[480px]" style="aspect-ratio: 1 / 1;">
+      <div class="grid grid-cols-5 grid-rows-5 gap-2 w-full h-full">
+        <% @phrases.each_with_index do |phrase, index| %>
+          <% is_free = phrase == "FREE" %>
+          <!-- phrase: <%= phrase.inspect %>, is_free: <%= is_free %> -->
+          <div
+            class="relative flex items-center justify-center border-2 border-gray-400 rounded-lg bg-gray-50 text-center p-2 select-none transition-colors duration-200 cursor-pointer <%= is_free ? 'bg-green-200 border-green-500 font-bold' : 'hover:bg-gray-200' %>"
+            data-controller="bingo-cell"
+            data-action="click->bingo-cell#toggle"
+            style="aspect-ratio: 1 / 1; min-width: 0; min-height: 0;"
+            <%= 'id="free-cell" data-bingo-cell-free=true' if is_free %>
+          >
+            <span class="block w-full h-full flex items-center justify-center overflow-hidden text-ellipsis break-keep text-[clamp(0.6rem,1.5vw,0.9rem)]" style="word-break: keep-all; hyphens: auto; line-height: 0.99825;">
+              <%= (phrase.is_a?(Phrase) ? phrase.content : phrase).gsub('/', '/<wbr>').html_safe %>
+            </span>
+            <% if is_free %>
+              <div id="free-cell-mark" class="absolute inset-0 flex items-center justify-center" data-bingo-cell-target="mark" style="display:none">
+                <svg class="w-4/5 h-4/5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="4" x2="20" y2="20"></line>
+                  <line x1="20" y1="4" x2="4" y2="20"></line>
+                </svg>
+              </div>
+            <% else %>
+              <div class="absolute inset-0 flex items-center justify-center hidden" data-bingo-cell-target="mark">
+                <svg class="w-4/5 h-4/5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="4" y1="4" x2="20" y2="20"></line>
+                  <line x1="20" y1="4" x2="4" y2="20"></line>
+                </svg>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" onclick="location.reload()">Reset Card</button>
+  </div>
+</div>
+<script>
+  document.addEventListener("bingo:win", function() {
+    const overlay = document.getElementById("bingo-overlay");
+    const word = overlay.querySelector("span");
+    word.classList.remove("hidden");
+    word.classList.add("animate-pulse");
+    setTimeout(() => {
+      word.classList.remove("animate-pulse");
+    }, 5000);
+  });
+
+  // Flash the FREE cell and overlay the red X
+  document.addEventListener("DOMContentLoaded", function() {
+    const freeCellDiv = document.getElementById("free-cell");
+    const freeCellMark = document.getElementById("free-cell-mark");
+    if (freeCellDiv && freeCellMark) {
+      freeCellMark.classList.add("hidden"); // Hide X initially
+      // Force reflow to ensure animation triggers
+      void freeCellDiv.offsetWidth;
+      freeCellDiv.classList.add("animate-pulse");
+      freeCellDiv.style.backgroundColor = '#fbbf24'; // Amber-400 for debug
+      setTimeout(() => {
+        freeCellDiv.classList.remove("animate-pulse");
+        freeCellDiv.style.backgroundColor = '';
+        freeCellMark.classList.remove("hidden"); // Show X after flash
+      }, 2000);
+    }
+  });
+</script>
