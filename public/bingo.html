@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BodyCam Bingo - The Retired PoPo</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .top-links {
+            width: 100vw;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-top: 16px;
+            margin-bottom: 0;
+            padding-left: 24px;
+        }
+        .home-link {
+            color: #1976d2;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1.1em;
+            margin-right: 16px;
+        }
+        h1 {
+            color: #d32f2f;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            font-size: 2em;
+            font-family: 'Arial Black', Arial, sans-serif;
+        }
+        .subtitle {
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 1.1em;
+        }
+        .bingo-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-bottom: 24px;
+            width: 90vw;
+            max-width: 600px;
+        }
+        .bingo-cell {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            min-width: 0;
+            min-height: 0;
+            background: #fafafa;
+            border: 2px solid #d32f2f;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 6px;
+            box-sizing: border-box;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+            word-break: break-word;
+            transition: background 0.2s, color 0.2s;
+        }
+        .bingo-cell.selected {
+            /* No background color change */
+        }
+        .bingo-cell .x-mark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            color: #d32f2f;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .bingo-cell.free {
+            background: #ffe0e0;
+            color: #d32f2f;
+            cursor: default;
+        }
+        .bingo-cell.free .x-mark {
+            color: #d32f2f;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 24px;
+            font-size: 1em;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: background 0.2s;
+        }
+        button:disabled {
+            background: #b0b0b0;
+            cursor: not-allowed;
+        }
+        button:hover:enabled {
+            background: #0d47a1;
+        }
+        .win-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255,255,255,0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            font-size: 7vw;
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+            animation: flash-bingo 1s infinite;
+            flex-direction: column;
+            display: flex;
+        }
+        @keyframes flash-bingo {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.2; }
+        }
+        @media (max-width: 700px) {
+            .bingo-board {
+                padding: 5vw;
+                max-width: 98vw;
+            }
+            .bingo-cell {
+                font-size: 0.95em;
+            }
+            .bingo-cell .x-mark {
+                font-size: 1.7em;
+            }
+            .win-message {
+                font-size: 12vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-links">
+        <a class="home-link" href="/">&#8592; Home</a>
+    </div>
+    <h1>BodyCam Bingo</h1>
+    <div class="subtitle">Play along while watching The Retired PoPo on YouTube!</div>
+    <div class="controls">
+        <button id="newCardBtn" onclick="newGame()">New Card</button>
+    </div>
+    <div class="win-message" id="winMessage">BINGO!</div>
+    <div class="bingo-board" id="bingoBoard"></div>
+    <script>
+    const phrases = [
+        "Assaults/Spits", "Bad Ai/Captions", "Bangs Head/Kicks Car", "Bodycam Falls Off",
+        "Calls 911 On Cops", "Can't Breathe", "Claims Wealth/ Cop's Salary", "Clearly Lying",
+        "Timer/Count down", "Cop Has Tattoos", "Cop Hooks Thumbs In Vest", "Cop In Ball Cap",
+        "Cop In Black Gloves", "Cop In Military Style Vest", "Cop Loses Cool", "Cuffs Too Tight",
+        "Curses/Calls Cops Names", "Demands Name/Badge Number", "Demon Poss- ession",
+        "Didn't Do/What's The Charge", "Dog/Cat/Pet Involved", "Don't Touch Me/Get Off Me",
+        "Double Locks Cuffs", "Family Is A Cop/Lawyer", "Gets Tased/ Sprayed", "Goes To The Ground",
+        "I Pay Your Salary", "It Hurts", "Lawsuit/Lose Job", "Medic Called", "N Word/Dawg/Bruh",
+        "No Id/Refuses To Id", "Poops/Pees", "Race Card", "Repeats More Than 3x",
+        "Hobble/Spit Hood/Wrap", "Sidewalk Lawyer", "Slips Cuffs", "Small Genitalia",
+        "Stop Resist/ I'm Not Resist", "Suspect Calling For Help", "Suspect Is Drunk/Drugs",
+        "Super- visor On Scene", "Threatens Cop", "Trespass/Won't Leave", "Videos Cops",
+        "Wants Lawyer", "Wants Phone/Call Someone", "Wants Super- visor", "Won't Exit/Enter Car",
+        "Won't Get Off Phone", "Won't Let Go Of Phone", "Won't Walk", "You Know Who I Am?",
+        "Wanna Get Tased/Sprayed"
+    ];
+
+    let selectedPhrases = [];
+    let marked = Array(5).fill().map(() => Array(5).fill(false));
+    let bingoActive = false;
+    let bingoTimeout = null;
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function createBingoCard() {
+        const board = document.getElementById('bingoBoard');
+        board.innerHTML = '';
+        marked = Array(5).fill().map(() => Array(5).fill(false));
+        selectedPhrases = shuffleArray([...phrases]).slice(0, 24);
+        let cellIndex = 0;
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                const cell = document.createElement('div');
+                cell.className = 'bingo-cell';
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                if (i === 2 && j === 2) {
+                    cell.innerHTML = 'FREE';
+                    cell.classList.add('free');
+                    marked[i][j] = true;
+                    const xMark = document.createElement('span');
+                    xMark.className = 'x-mark';
+                    xMark.textContent = 'X';
+                    cell.appendChild(xMark);
+                } else {
+                    const phrase = selectedPhrases[cellIndex++].replace(/\//g, '/<br>');
+                    cell.innerHTML = phrase;
+                    cell.addEventListener('click', function() {
+                        if (!marked[i][j] && !bingoActive) {
+                            marked[i][j] = true;
+                            const xMark = document.createElement('span');
+                            xMark.className = 'x-mark';
+                            xMark.textContent = 'X';
+                            cell.appendChild(xMark);
+                            cell.classList.add('selected');
+                            checkWin();
+                        }
+                    });
+                }
+                board.appendChild(cell);
+            }
+        }
+    }
+
+    function checkWin() {
+        // Check rows
+        for (let i = 0; i < 5; i++) {
+            if (marked[i].every(Boolean)) {
+                showBingo();
+                return;
+            }
+        }
+        // Check columns
+        for (let j = 0; j < 5; j++) {
+            let colWin = true;
+            for (let i = 0; i < 5; i++) {
+                if (!marked[i][j]) {
+                    colWin = false;
+                    break;
+                }
+            }
+            if (colWin) {
+                showBingo();
+                return;
+            }
+        }
+        // Check diagonals
+        let diag1 = true, diag2 = true;
+        for (let i = 0; i < 5; i++) {
+            if (!marked[i][i]) diag1 = false;
+            if (!marked[i][4 - i]) diag2 = false;
+        }
+        if (diag1 || diag2) {
+            showBingo();
+            return;
+        }
+        hideBingo();
+    }
+
+    function showBingo() {
+        bingoActive = true;
+        const winMsg = document.getElementById('winMessage');
+        winMsg.style.display = 'flex';
+        document.getElementById('newCardBtn').disabled = true;
+        if (bingoTimeout) clearTimeout(bingoTimeout);
+        bingoTimeout = setTimeout(() => {
+            hideBingo();
+            document.getElementById('newCardBtn').disabled = false;
+        }, 3000);
+    }
+    function hideBingo() {
+        bingoActive = false;
+        document.getElementById('winMessage').style.display = 'none';
+        if (bingoTimeout) clearTimeout(bingoTimeout);
+    }
+
+    function newGame() {
+        hideBingo();
+        createBingoCard();
+        document.getElementById('newCardBtn').disabled = false;
+    }
+
+    // Initialize
+    window.onload = newGame;
+    </script>
+</body>
+</html> 
