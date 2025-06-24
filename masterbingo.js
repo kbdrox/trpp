@@ -10,6 +10,7 @@ class BingoGame {
     }
 
     initializeElements() {
+        console.log('Initializing elements...');
         this.phraseList = document.getElementById('phraseList');
         this.cardsContainer = document.getElementById('cardsContainer');
         this.loadPhrasesBtn = document.getElementById('loadPhrasesBtn');
@@ -18,16 +19,35 @@ class BingoGame {
         this.phraseInput = document.getElementById('phraseInput');
         this.submitBtn = document.getElementById('submitBtn');
         this.cancelBtn = document.getElementById('cancelBtn');
+        
+        console.log('Elements found:');
+        console.log('- phraseList:', this.phraseList);
+        console.log('- cardsContainer:', this.cardsContainer);
+        console.log('- loadPhrasesBtn:', this.loadPhrasesBtn);
+        console.log('- resetBtn:', this.resetBtn);
+        console.log('- modal:', this.modal);
+        console.log('- phraseInput:', this.phraseInput);
+        console.log('- submitBtn:', this.submitBtn);
+        console.log('- cancelBtn:', this.cancelBtn);
     }
 
     attachEventListeners() {
-        this.loadPhrasesBtn.addEventListener('click', () => this.showPhraseModal());
+        console.log('Attaching event listeners...');
+        console.log('loadPhrasesBtn:', this.loadPhrasesBtn);
+        console.log('modal:', this.modal);
+        
+        this.loadPhrasesBtn.addEventListener('click', () => {
+            console.log('Load Phrases button clicked!');
+            this.showPhraseModal();
+        });
         this.resetBtn.addEventListener('click', () => this.resetGame());
         this.submitBtn.addEventListener('click', () => this.submitPhrases());
         this.cancelBtn.addEventListener('click', () => this.hidePhraseModal());
     }
 
     showPhraseModal() {
+        console.log('Showing modal...');
+        console.log('Modal element:', this.modal);
         this.modal.style.display = 'block';
     }
 
@@ -225,8 +245,10 @@ class BingoGame {
                     cell.className = 'cell';
                     if (phrase === 'FREE') {
                         cell.classList.add('free');
+                        cell.textContent = phrase;
+                    } else {
+                        cell.innerHTML = phrase.replace(/\//g, '/<br>');
                     }
-                    cell.textContent = phrase;
                     cell.dataset.row = i;
                     cell.dataset.col = j;
                     
